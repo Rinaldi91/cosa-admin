@@ -96,7 +96,7 @@ const Login = () => {
 
       <Head>
         <title>COSA APP | Login</title>
-        <link rel="icon" href="/maskot_cosaapp.ico" />
+        <link rel="icon" href="/assets/images/icon/icon_cosaapp.ico" />
       </Head>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">

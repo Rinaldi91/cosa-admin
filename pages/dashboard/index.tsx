@@ -1,7 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { FaTachometerAlt, FaUserAlt, FaCog, FaUserCircle, FaBox, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaTachometerAlt,
+  FaUserAlt,
+  FaCog,
+  FaUserCircle,
+  FaBox,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import toast from "react-hot-toast";
 import axios from "axios";
 import Cookies from "js-cookie"; // Import library cookies
@@ -10,13 +17,16 @@ import { Divider } from "@mui/material";
 import PatientDetail from "../patients/show";
 import BTControlForm from "../btcontrol";
 import Patients from "../patients";
+import DashboardPage from "./page";
 
 const Dashboard = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string>("dashboard");
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,7 +90,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
@@ -101,7 +114,13 @@ const Dashboard = () => {
   };
 
   const handleMenuClick = (menu: string) => {
-    const query: { menu: string; page?: string; limit?: string; search?: string; id?: string } = { menu };
+    const query: {
+      menu: string;
+      page?: string;
+      limit?: string;
+      search?: string;
+      id?: string;
+    } = { menu };
     if (menu === "patients") {
       query.page = "1";
       query.limit = "10";
@@ -126,7 +145,7 @@ const Dashboard = () => {
     <>
       <Head>
         <title>COSA APP | Dashboard</title>
-        <link rel="icon" href="/maskot_cosaapp.ico" />
+        <link rel="icon" href="/assets/images/icon/icon_cosaapp.ico" />
       </Head>
       <div className="flex h-screen bg-gray-100">
         <aside className="w-64 bg-blue-600 text-white flex flex-col">
@@ -144,7 +163,11 @@ const Dashboard = () => {
           <nav className="flex-1 p-4">
             <ul>
               {[
-                { name: "Dashboard", icon: <FaTachometerAlt />, menu: "dashboard" },
+                {
+                  name: "Dashboard",
+                  icon: <FaTachometerAlt />,
+                  menu: "dashboard",
+                },
                 { name: "BT Control", icon: <FaBox />, menu: "btcontrol" },
                 { name: "Patients", icon: <FaUserAlt />, menu: "patients" },
                 { name: "Settings", icon: <FaCog />, menu: "settings" },
@@ -152,8 +175,9 @@ const Dashboard = () => {
                 <li key={index} className="mb-2">
                   <button
                     onClick={() => handleMenuClick(item.menu)}
-                    className={`flex items-center py-2 px-4 w-full rounded hover:bg-blue-700 ${activeMenu === item.menu ? "bg-blue-700" : ""
-                      }`}
+                    className={`flex items-center py-2 px-4 w-full rounded hover:bg-blue-700 ${
+                      activeMenu === item.menu ? "bg-blue-700" : ""
+                    }`}
                   >
                     <span className="mr-3">{item.icon}</span>
                     {item.name}
@@ -177,9 +201,7 @@ const Dashboard = () => {
                   toggleDropdown();
                 }}
               >
-                <FaUserCircle
-                  className="text-2xl cursor-pointer text-white"
-                />
+                <FaUserCircle className="text-2xl cursor-pointer text-white hover:text-gray-200" />
                 {isDropdownOpen && (
                   <div
                     ref={dropdownRef}
@@ -189,22 +211,13 @@ const Dashboard = () => {
                       <li>
                         <button
                           onClick={handleLogout}
-                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200 w-full text-left"
                         >
                           <div className="flex justify-start items-center">
-                            <FaSignOutAlt className="mr-2" />
-                            <p>Logout</p>
-                          </div>
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          onClick={handleLogout}
-                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200 w-full text-left"
-                        >
-                          <div className="flex justify-start items-center">
-                            <FaCog className="mr-2" />
-                            <p>Setting</p>
+                            <FaSignOutAlt className="mr-2 text-gray-600 group-hover:text-gray-900 transition-colors duration-200" />
+                            <p className="group-hover:font-semibold transition-all duration-200">
+                              Logout
+                            </p>
                           </div>
                         </button>
                       </li>
@@ -215,9 +228,7 @@ const Dashboard = () => {
             </div>
           </header>
           <main className="flex-1 p-6 overflow-auto">
-            {activeMenu === "dashboard" && (
-              <div className="text-xl font-bold">Welcome to Dashboard!</div>
-            )}
+            {activeMenu === "dashboard" && <DashboardPage />}
             {activeMenu === "patients" &&
               (selectedPatientId ? (
                 <PatientDetail patientId={selectedPatientId} />

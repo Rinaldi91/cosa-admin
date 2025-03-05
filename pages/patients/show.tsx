@@ -32,6 +32,9 @@ import {
 import Cookies from "js-cookie";
 import BarcodeComponent from "@/components/BarcodeComponent";
 import DateTimeDisplay from "@/components/DateTimeDisplay";
+import Head from "next/head";
+import { FaUser } from "react-icons/fa";
+import { BookOnline, List } from "@mui/icons-material";
 
 // Register Chart.js components
 ChartJS.register(
@@ -149,7 +152,7 @@ const PatientDetail = ({ patientId }: PatientDetailProps) => {
 
   const getGlucoseChartData = () => {
     const labels = glucoseTests.map((test) =>
-      new Date(test.date_time).toLocaleDateString("id-ID"),
+      new Date(test.date_time).toLocaleDateString("id-ID")
     );
     const data = glucoseTests.map((test) => parseFloat(test.glucos_value));
 
@@ -219,8 +222,17 @@ const PatientDetail = ({ patientId }: PatientDetailProps) => {
 
   return (
     <>
+      <Head>
+        <title>COSA APP | Patient Details</title>
+        <link rel="icon" href="/assets/images/icon/icon_cosaapp.ico" />
+      </Head>
       <div className="flex justify-between items-center mx-4">
-        <Typography variant="h6">Patient Information Detail</Typography>
+        <div className="flex justify-start items-center gap-2">
+          <FaUser className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">
+            Patient Information Details
+          </h2>
+        </div>
         <Typography
           onClick={handleBackClick}
           style={{
@@ -290,7 +302,12 @@ const PatientDetail = ({ patientId }: PatientDetailProps) => {
 
       {/* Daftar Hasil Test Glukosa */}
       <div className="p-4">
-        <Typography variant="h6">Glucose Test Results</Typography>
+        <div className="flex justify-start items-center gap-2">
+          <List className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">
+            Glucose Test Results
+          </h2>
+        </div>
         <div className="mb-4"></div>
         {/* Table */}
         <Paper className="space-y-4">

@@ -20,14 +20,16 @@ import {
   Menu,
   MenuItem,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { toast } from "react-hot-toast";
-import { FaInfoCircle, FaTrash } from "react-icons/fa";
+import { FaInfoCircle, FaTrash, FaUsers } from "react-icons/fa";
 import { PiPencil } from "react-icons/pi";
 import Cookies from "js-cookie";
 import { CgMoreVertical } from "react-icons/cg";
+import { Close } from "@mui/icons-material";
 interface Patient {
   id: number;
   name: string;
@@ -66,6 +68,8 @@ const Patients = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({}); // State untuk menyimpan error
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // Untuk menu dropdown
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null); // Untuk menyimpan pasien yang dipilih
+
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -184,15 +188,23 @@ const Patients = () => {
       newErrors.nik = "NIK must be exactly 16 digits and contain only numbers";
     }
 
-    // Validasi nomor telepon (11-12 digit dan hanya angka)
-    if (
-      newPatient.number_phone &&
-      (newPatient.number_phone.length < 11 ||
-        newPatient.number_phone.length > 12 ||
-        !/^\d+$/.test(newPatient.number_phone))
-    ) {
-      newErrors.number_phone =
-        "Phone number must be between 11 and 12 digits and contain only numbers";
+    // **Perbaikan validasi nomor telepon**
+    if (newPatient.number_phone) {
+      if (!/^\d+$/.test(newPatient.number_phone)) {
+        newErrors.number_phone = "Phone number must contain only numbers";
+      }
+      // Validasi panjang hanya jika tidak dalam rentang yang benar
+      else if (
+        newPatient.number_phone.length >= 11 &&
+        newPatient.number_phone.length <= 13
+      ) {
+        if (!newPatient.number_phone.startsWith("08")) {
+          newErrors.number_phone = "Invalid Phone Number, must start with '08'";
+        }
+      } else {
+        newErrors.number_phone =
+          "Phone number must be between 11 and 13 digits";
+      }
     }
 
     // Validasi email format
@@ -276,11 +288,11 @@ const Patients = () => {
       );
       toast.success("Patient deleted successfully");
       fetchData(); // Refresh data pasien
-      handleCloseMenu();
     } catch {
       toast.error("Failed to delete patient");
-      handleCloseMenu();
     }
+    setOpen(false);
+    handleCloseMenu();
   };
 
   // Perbarui filteredPatients untuk pencarian berdasarkan patient_code, barcode, atau nik
@@ -303,11 +315,14 @@ const Patients = () => {
     <>
       <Head>
         <title>COSA APP | Patients</title>
-        <link rel="icon" href="/maskot_cosaapp.ico" />
+        <link rel="icon" href="/assets/images/icon/icon_cosaapp.ico" />
       </Head>
 
       <div>
-        <h2 className="text-xl font-semibold">Patients</h2>
+        <div className="flex justify-start items-center gap-2">
+          <FaUsers className="h-7 w-7" />
+          <h2 className="text-xl font-semibold">Patients</h2>
+        </div>
         <div className="flex justify-between items-center space-x-4">
           <TextField
             label="Search"
@@ -321,6 +336,15 @@ const Patients = () => {
               "& .MuiInputBase-root": {
                 height: "100%",
               },
+            }}
+            InputProps={{
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setSearchTerm("")} edge="end">
+                    <Close />
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
           />
           <button
@@ -399,7 +423,7 @@ const Patients = () => {
                             <PiPencil className="mr-2" /> Edit
                           </MenuItem>
                           <MenuItem
-                            onClick={handleDeletePatient}
+                            onClick={() => setOpen(true)}
                             className="flex items-center"
                           >
                             <FaTrash className="mr-2" /> Delete
@@ -426,6 +450,26 @@ const Patients = () => {
         )}
       </div>
 
+      {/* Dialog Konfirmasi */}
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Notification</DialogTitle>
+        <DialogContent>
+          <div className="p-4">
+            <p>Are you sure you want to delete this patient?</p>
+            <div className="flex justify-end mt-4 gap-2">
+              <DialogActions>
+                <Button onClick={() => setOpen(false)} color="secondary">
+                  Cancel
+                </Button>
+                <Button onClick={handleDeletePatient} color="primary">
+                  Delete
+                </Button>
+              </DialogActions>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Modal untuk menambahkan pasien */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)}>
         <DialogTitle>Add New Patient</DialogTitle>
@@ -444,7 +488,10 @@ const Patients = () => {
             }}
             onBlur={() => {
               if (newPatient.nik.length !== 16) {
-                setErrors((prev) => ({ ...prev, nik: "NIK must be 16 digits" }));
+                setErrors((prev) => ({
+                  ...prev,
+                  nik: "NIK must be 16 digits",
+                }));
               } else {
                 setErrors((prev) => ({ ...prev, nik: "" }));
               }
@@ -508,13 +555,39 @@ const Patients = () => {
             variant="outlined"
             fullWidth
             value={newPatient.number_phone}
-            onChange={(e) =>
-              setNewPatient({ ...newPatient, number_phone: e.target.value })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              // Hanya izinkan angka dan batasi panjang maksimal 13 karakter
+              if (/^\d*$/.test(value) && value.length <= 13) {
+                setNewPatient({ ...newPatient, number_phone: value });
+              }
+            }}
+            onBlur={() => {
+              const { number_phone } = newPatient;
+
+              // Reset error dulu
+              let errorMessage = "";
+
+              // Validasi panjang nomor (harus 11-13)
+              if (number_phone.length < 11 || number_phone.length > 13) {
+                errorMessage = "Phone number must be between 11 and 13 digits";
+              }
+              // Jika panjangnya sudah benar, cek apakah diawali dengan '08'
+              else if (!number_phone.startsWith("08")) {
+                errorMessage = "Invalid Phone Number, must start with '08'";
+              }
+
+              // Set error jika ada
+              setErrors((prev) => ({
+                ...prev,
+                number_phone: errorMessage,
+              }));
+            }}
             margin="normal"
             error={!!errors.number_phone}
             helperText={errors.number_phone}
           />
+
           <TextField
             label="Email"
             variant="outlined"
