@@ -34,7 +34,7 @@ import BarcodeComponent from "@/components/BarcodeComponent";
 import DateTimeDisplay from "@/components/DateTimeDisplay";
 import Head from "next/head";
 import { FaUser } from "react-icons/fa";
-import { BookOnline, List } from "@mui/icons-material";
+import { List } from "@mui/icons-material";
 
 // Register Chart.js components
 ChartJS.register(

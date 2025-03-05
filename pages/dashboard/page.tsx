@@ -14,7 +14,6 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 const DashboardPage = () => {
   const [totalPatients, setTotalPatients] = useState(0);
-  const [previousPatients, setPreviousPatients] = useState(0);
   const [percentageChange, setPercentageChange] = useState("0%");
   // Explicitly typed chart options
   const [chartOptions] = useState<ApexOptions>({
@@ -92,7 +91,6 @@ const DashboardPage = () => {
   
           // Karena tidak ada data pasien individual, kita hanya bisa menyimpan total ini
           setTotalPatients(totalPatients);
-          setPreviousPatients(0); // Tidak ada data sebelumnya, jadi set ke 0
           setPercentageChange("N/A"); // Tidak bisa hitung perubahan persentase tanpa data sebelumnya
         } else {
           console.error("Invalid response format:", response.data);
